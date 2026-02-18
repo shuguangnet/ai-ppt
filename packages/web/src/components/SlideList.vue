@@ -1,5 +1,5 @@
 <template>
-  <div class="w-52 bg-dark-light border-r border-slate-700 overflow-y-auto p-3 space-y-2">
+  <div class="w-full h-full overflow-y-auto p-3 space-y-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
     <div
       v-for="(slide, i) in store.slides"
       :key="slide.id"
