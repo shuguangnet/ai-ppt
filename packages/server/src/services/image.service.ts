@@ -1,5 +1,10 @@
 import 'dotenv/config'
 
+interface ImageConfig {
+  apiKey?: string
+  provider?: 'pexels' | 'unsplash'
+}
+
 async function fetchAsBase64(url: string): Promise<string> {
   const res = await fetch(url)
   if (!res.ok) return ''
@@ -8,27 +13,41 @@ async function fetchAsBase64(url: string): Promise<string> {
   return `data:${mime};base64,${buf.toString('base64')}`
 }
 
-async function searchPexels(keyword: string): Promise<string> {
-  const key = process.env.PEXELS_API_KEY
+async function searchPexels(keyword: string, apiKey?: string): Promise<string> {
+  const key = apiKey || process.env.PEXELS_API_KEY
   if (!key) return ''
-  const res = await fetch(
-    `https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=3&size=medium`,
-    { headers: { Authorization: key } },
-  )
-  if (!res.ok) return ''
-  const data = await res.json()
-  // Pick a random one from top 3 for variety
-  const photos = data.photos || []
-  const photo = photos[Math.floor(Math.random() * photos.length)]
-  return photo?.src?.large || ''
+  try {
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(keyword)}&per_page=3&size=medium`,
+      { headers: { Authorization: key } },
+    )
+    if (!res.ok) return ''
+    const data = await res.json()
+    const photos = data.photos || []
+    const photo = photos[Math.floor(Math.random() * photos.length)]
+    return photo?.src?.large || ''
+  } catch {
+    return ''
+  }
 }
 
-export async function searchImage(keyword: string): Promise<string> {
-  // Try Pexels first (relevant, high quality)
-  let url = await searchPexels(keyword)
-  // Fallback: Wikimedia Commons (free, no API key, keyword-based)
-  if (!url) url = await searchWikimedia(keyword)
-  return url
+async function searchUnsplash(keyword: string, apiKey?: string): Promise<string> {
+  const key = apiKey || process.env.UNSPLASH_API_KEY
+  if (!key) return ''
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(keyword)}&per_page=3&orientation=landscape`,
+      { headers: { Authorization: `Client-ID ${key}` } },
+    )
+    if (!res.ok) return ''
+    const data = await res.json()
+    const photos = data.results || []
+    if (!photos.length) return ''
+    const photo = photos[Math.floor(Math.random() * photos.length)]
+    return photo?.urls?.regular || ''
+  } catch {
+    return ''
+  }
 }
 
 async function searchWikimedia(keyword: string): Promise<string> {
@@ -44,6 +63,22 @@ async function searchWikimedia(keyword: string): Promise<string> {
   } catch {
     return ''
   }
+}
+
+export async function searchImage(keyword: string, config?: ImageConfig): Promise<string> {
+  const { apiKey, provider } = config || {}
+
+  // 根据配置的 provider 或默认顺序搜索
+  if (provider === 'unsplash') {
+    let url = await searchUnsplash(keyword, apiKey)
+    if (!url) url = await searchWikimedia(keyword)
+    return url
+  }
+
+  // 默认 pexels
+  let url = await searchPexels(keyword, apiKey)
+  if (!url) url = await searchWikimedia(keyword)
+  return url
 }
 
 export async function downloadImage(url: string): Promise<string> {

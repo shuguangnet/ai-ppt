@@ -1,4 +1,4 @@
-import type { PptData, AIConfig } from '@/types/slides'
+import type { PptData, AIConfig, ImageConfig } from '@/types/slides'
 
 const BASE = '/api'
 
@@ -48,8 +48,13 @@ export async function aiGenerateStream(
   return result
 }
 
-export async function searchImage(keyword: string): Promise<string> {
-  const res = await fetch(`${BASE}/image/search?q=${encodeURIComponent(keyword)}`)
+export async function searchImage(keyword: string, config?: ImageConfig): Promise<string> {
+  const params = new URLSearchParams({ q: keyword })
+  if (config?.apiKey) {
+    params.set('apiKey', config.apiKey)
+    params.set('provider', config.provider || 'pexels')
+  }
+  const res = await fetch(`${BASE}/image/search?${params}`)
   if (!res.ok) return ''
   const data = await res.json()
   return data.url || ''

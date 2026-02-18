@@ -17,7 +17,7 @@
         </button>
       </div>
       <button @click="showSettings = true" class="mt-6 text-xs text-slate-500 hover:text-primary transition">
-        {{ aiStore.isConfigured ? '✓ 已配置自定义AI' : '配置自定义 AI 模型' }}
+        {{ aiStore.isConfigured || aiStore.imageApiKey ? '✓ 已配置 API' : '配置 API' }}
       </button>
     </template>
 
@@ -218,10 +218,11 @@ const loadingImages = ref(false)
 async function confirm() {
   if (!outlineData.value) return
   loadingImages.value = true
+  const imageConfig = aiStore.getImageConfig()
   try {
     const tasks = outlineData.value.slides.map(async (slide) => {
       if (slide.imageKeyword && !slide.imageUrl) {
-        slide.imageUrl = await searchImage(slide.imageKeyword)
+        slide.imageUrl = await searchImage(slide.imageKeyword, imageConfig)
       }
     })
     await Promise.all(tasks)

@@ -40,3 +40,8 @@ export interface AIConfig {
   baseUrl: string
   model: string
 }
+
+export interface ImageConfig {
+  apiKey: string
+  provider: 'pexels' | 'unsplash'
+}
