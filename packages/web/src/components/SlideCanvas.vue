@@ -10,16 +10,16 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent text-center text-2xl md:text-3xl font-bold w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-          :style="{ color: '#' + currentTheme.text }"
+          class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
         <div class="w-32 h-1 rounded my-4" :style="{ background: '#' + currentTheme.primary }"></div>
         <input
           :value="slide.subtitle || ''"
           @input="update('subtitle', ($event.target as HTMLInputElement).value)"
           placeholder="副标题"
-          class="bg-transparent text-center text-sm md:text-base w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-          :style="{ color: '#' + currentTheme.muted }"
+          class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="getTextStyle(slide.subtitleStyle, currentTheme.muted)"
         />
       </div>
     </template>
@@ -29,8 +29,8 @@
       <input
         :value="slide.title"
         @input="update('title', ($event.target as HTMLInputElement).value)"
-        class="bg-transparent text-xl md:text-2xl font-bold mb-1 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-        :style="{ color: '#' + currentTheme.text }"
+        class="bg-transparent mb-1 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+        :style="getTextStyle(slide.titleStyle, currentTheme.text)"
       />
       <div class="w-16 h-1 rounded mb-4" :style="{ background: '#' + currentTheme.primary }"></div>
       <div class="flex-1 flex gap-4">
@@ -40,8 +40,8 @@
             <input
               :value="b"
               @input="updateBullet(i, ($event.target as HTMLInputElement).value)"
-              class="flex-1 bg-transparent text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
-              :style="{ color: '#' + currentTheme.text }"
+              class="flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
+              :style="getTextStyle(slide.bulletStyle, currentTheme.text)"
             />
             <button @click="removeBullet(i)" class="text-slate-600 hover:text-red-400 text-xs">&times;</button>
           </div>
@@ -58,8 +58,8 @@
       <input
         :value="slide.title"
         @input="update('title', ($event.target as HTMLInputElement).value)"
-        class="bg-transparent text-lg md:text-xl font-bold mb-2 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-        :style="{ color: '#' + currentTheme.text }"
+        class="bg-transparent mb-2 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+        :style="getTextStyle(slide.titleStyle, currentTheme.text)"
       />
       <div class="flex-1 flex items-center justify-center border border-dashed border-slate-600 rounded-lg overflow-hidden">
         <img v-if="slide.imageUrl" :src="slide.imageUrl" class="max-w-full max-h-full object-contain" @error="($event.target as HTMLImageElement).style.display='none'" />
@@ -78,8 +78,8 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent text-center text-2xl md:text-3xl font-bold w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-          :style="{ color: '#' + currentTheme.text }"
+          class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
         <div class="w-24 h-1 rounded mt-4" :style="{ background: '#' + currentTheme.primary }"></div>
       </div>
@@ -91,15 +91,15 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent text-center text-2xl md:text-3xl font-bold w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-          :style="{ color: '#' + currentTheme.text }"
+          class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
         <input
           :value="slide.subtitle || ''"
           @input="update('subtitle', ($event.target as HTMLInputElement).value)"
           placeholder="副标题"
-          class="bg-transparent text-center text-sm w-full mt-3 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
-          :style="{ color: '#' + currentTheme.muted }"
+          class="bg-transparent text-center w-full mt-3 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="getTextStyle(slide.subtitleStyle, currentTheme.muted)"
         />
       </div>
     </template>
@@ -110,11 +110,20 @@
 import { computed } from 'vue'
 import { useSlidesStore } from '@/stores/slides'
 import { getTheme } from '@/config/themes'
-import type { Slide } from '@/types/slides'
+import type { Slide, TextStyle } from '@/types/slides'
 
 const store = useSlidesStore()
 const slide = computed(() => store.activeSlide)
 const currentTheme = computed(() => getTheme(store.theme))
+
+function getTextStyle(style?: TextStyle, fallbackColor?: string) {
+  return {
+    fontWeight: style?.bold ? 'bold' : 'normal',
+    fontStyle: style?.italic ? 'italic' : 'normal',
+    fontSize: style?.fontSize ? `${style.fontSize}px` : undefined,
+    color: style?.color ? `#${style.color}` : (fallbackColor ? `#${fallbackColor}` : undefined),
+  }
+}
 
 function update(key: keyof Slide, value: string) {
   store.updateSlide(store.activeIndex, { [key]: value })

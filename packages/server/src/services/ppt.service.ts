@@ -1,6 +1,13 @@
 import PptxGenJS from 'pptxgenjs'
 import { downloadImage } from './image.service.js'
 
+interface TextStyle {
+  bold?: boolean
+  italic?: boolean
+  fontSize?: number
+  color?: string
+}
+
 interface Slide {
   layout: 'title' | 'content' | 'section' | 'thanks' | 'image'
   title: string
@@ -8,6 +15,9 @@ interface Slide {
   bullets?: string[]
   imageUrl?: string
   imageKeyword?: string
+  titleStyle?: TextStyle
+  subtitleStyle?: TextStyle
+  bulletStyle?: TextStyle
 }
 
 interface PptData {
@@ -50,12 +60,20 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
       case 'title':
         s.addText(slide.title, {
           x: 0.8, y: 2.0, w: '85%', h: 1.5,
-          fontSize: 36, bold: true, color: T.text, align: 'center',
+          fontSize: slide.titleStyle?.fontSize || 36,
+          bold: slide.titleStyle?.bold ?? true,
+          italic: slide.titleStyle?.italic || false,
+          color: slide.titleStyle?.color || T.text,
+          align: 'center',
         })
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
             x: 0.8, y: 3.8, w: '85%', h: 0.8,
-            fontSize: 18, color: T.muted, align: 'center',
+            fontSize: slide.subtitleStyle?.fontSize || 18,
+            bold: slide.subtitleStyle?.bold || false,
+            italic: slide.subtitleStyle?.italic || false,
+            color: slide.subtitleStyle?.color || T.muted,
+            align: 'center',
           })
         }
         s.addShape(pptx.ShapeType.rect, {
@@ -66,7 +84,10 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
       case 'content':
         s.addText(slide.title, {
           x: 0.8, y: 0.4, w: '85%', h: 0.8,
-          fontSize: 28, bold: true, color: T.text,
+          fontSize: slide.titleStyle?.fontSize || 28,
+          bold: slide.titleStyle?.bold ?? true,
+          italic: slide.titleStyle?.italic || false,
+          color: slide.titleStyle?.color || T.text,
         })
         s.addShape(pptx.ShapeType.rect, {
           x: 0.8, y: 1.2, w: 2.0, h: 0.06, fill: { color: T.primary },
@@ -79,7 +100,11 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
           }))
           s.addText(bulletText, {
             x: 0.8, y: 1.6, w: bw, h: 4.5,
-            fontSize: 18, color: T.text, lineSpacingMultiple: 1.5,
+            fontSize: slide.bulletStyle?.fontSize || 18,
+            bold: slide.bulletStyle?.bold || false,
+            italic: slide.bulletStyle?.italic || false,
+            color: slide.bulletStyle?.color || T.text,
+            lineSpacingMultiple: 1.5,
           })
         }
         if (imgData) {
@@ -95,7 +120,10 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
       case 'image':
         s.addText(slide.title, {
           x: 0.8, y: 0.4, w: '85%', h: 0.8,
-          fontSize: 24, bold: true, color: T.text,
+          fontSize: slide.titleStyle?.fontSize || 24,
+          bold: slide.titleStyle?.bold ?? true,
+          italic: slide.titleStyle?.italic || false,
+          color: slide.titleStyle?.color || T.text,
         })
         if (imgData) {
           s.addImage({
@@ -115,7 +143,11 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
       case 'section':
         s.addText(slide.title, {
           x: 0.8, y: 2.5, w: '85%', h: 1.2,
-          fontSize: 32, bold: true, color: T.text, align: 'center',
+          fontSize: slide.titleStyle?.fontSize || 32,
+          bold: slide.titleStyle?.bold ?? true,
+          italic: slide.titleStyle?.italic || false,
+          color: slide.titleStyle?.color || T.text,
+          align: 'center',
         })
         s.addShape(pptx.ShapeType.rect, {
           x: 5.0, y: 3.8, w: 3.3, h: 0.06, fill: { color: T.primary },
@@ -125,12 +157,20 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
       case 'thanks':
         s.addText(slide.title, {
           x: 0.8, y: 2.0, w: '85%', h: 1.5,
-          fontSize: 36, bold: true, color: T.text, align: 'center',
+          fontSize: slide.titleStyle?.fontSize || 36,
+          bold: slide.titleStyle?.bold ?? true,
+          italic: slide.titleStyle?.italic || false,
+          color: slide.titleStyle?.color || T.text,
+          align: 'center',
         })
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
             x: 0.8, y: 3.8, w: '85%', h: 0.8,
-            fontSize: 16, color: T.muted, align: 'center',
+            fontSize: slide.subtitleStyle?.fontSize || 16,
+            bold: slide.subtitleStyle?.bold || false,
+            italic: slide.subtitleStyle?.italic || false,
+            color: slide.subtitleStyle?.color || T.muted,
+            align: 'center',
           })
         }
         break

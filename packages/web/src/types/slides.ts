@@ -1,3 +1,10 @@
+export interface TextStyle {
+  bold?: boolean
+  italic?: boolean
+  fontSize?: number
+  color?: string // hex without #
+}
+
 export interface Slide {
   id: string
   layout: 'title' | 'content' | 'section' | 'thanks' | 'image'
@@ -7,6 +14,10 @@ export interface Slide {
   imageUrl?: string
   imageKeyword?: string
   notes?: string
+  // Text styles
+  titleStyle?: TextStyle
+  subtitleStyle?: TextStyle
+  bulletStyle?: TextStyle
 }
 
 export interface PptData {
