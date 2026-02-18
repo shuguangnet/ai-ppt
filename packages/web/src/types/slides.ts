@@ -5,6 +5,7 @@ export interface Slide {
   subtitle?: string
   bullets?: string[]
   imageUrl?: string
+  imageKeyword?: string
   notes?: string
 }
 

@@ -33,18 +33,23 @@
         :style="{ color: '#' + currentTheme.text }"
       />
       <div class="w-16 h-1 rounded mb-4" :style="{ background: '#' + currentTheme.primary }"></div>
-      <div class="flex-1 space-y-2">
-        <div v-for="(b, i) in slide.bullets" :key="i" class="flex items-start gap-2">
-          <span class="mt-1 text-xs" :style="{ color: '#' + currentTheme.primary }">&#9679;</span>
-          <input
-            :value="b"
-            @input="updateBullet(i, ($event.target as HTMLInputElement).value)"
-            class="flex-1 bg-transparent text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
-            :style="{ color: '#' + currentTheme.text }"
-          />
-          <button @click="removeBullet(i)" class="text-slate-600 hover:text-red-400 text-xs">&times;</button>
+      <div class="flex-1 flex gap-4">
+        <div class="space-y-2" :class="slide.imageUrl ? 'flex-1' : 'w-full'">
+          <div v-for="(b, i) in slide.bullets" :key="i" class="flex items-start gap-2">
+            <span class="mt-1 text-xs" :style="{ color: '#' + currentTheme.primary }">&#9679;</span>
+            <input
+              :value="b"
+              @input="updateBullet(i, ($event.target as HTMLInputElement).value)"
+              class="flex-1 bg-transparent text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
+              :style="{ color: '#' + currentTheme.text }"
+            />
+            <button @click="removeBullet(i)" class="text-slate-600 hover:text-red-400 text-xs">&times;</button>
+          </div>
+          <button @click="addBullet" class="text-xs text-slate-500 hover:text-primary transition">+ 添加要点</button>
         </div>
-        <button @click="addBullet" class="text-xs text-slate-500 hover:text-primary transition">+ 添加要点</button>
+        <div v-if="slide.imageUrl" class="w-2/5 shrink-0 rounded-lg overflow-hidden">
+          <img :src="slide.imageUrl" class="w-full h-full object-cover" @error="($event.target as HTMLImageElement).style.display='none'" />
+        </div>
       </div>
     </template>
 

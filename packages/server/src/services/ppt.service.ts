@@ -1,4 +1,5 @@
 import PptxGenJS from 'pptxgenjs'
+import { downloadImage } from './image.service.js'
 
 interface Slide {
   layout: 'title' | 'content' | 'section' | 'thanks' | 'image'
@@ -6,6 +7,7 @@ interface Slide {
   subtitle?: string
   bullets?: string[]
   imageUrl?: string
+  imageKeyword?: string
 }
 
 interface PptData {
@@ -24,6 +26,16 @@ const THEMES: Record<string, { bg: string; primary: string; text: string; muted:
 
 export async function generatePptx(data: PptData): Promise<Buffer> {
   const T = THEMES[data.theme || 'dark'] || THEMES.dark
+
+  // Pre-download all images as base64
+  const imageMap = new Map<string, string>()
+  await Promise.all(
+    data.slides.filter(s => s.imageUrl).map(async (s) => {
+      const b64 = await downloadImage(s.imageUrl!)
+      if (b64) imageMap.set(s.imageUrl!, b64)
+    }),
+  )
+
   const pptx = new PptxGenJS()
   pptx.layout = 'LAYOUT_WIDE'
   pptx.author = 'AI PPT Platform'
@@ -32,6 +44,7 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
   for (const slide of data.slides) {
     const s = pptx.addSlide()
     s.background = { color: T.bg }
+    const imgData = slide.imageUrl ? imageMap.get(slide.imageUrl) : undefined
 
     switch (slide.layout) {
       case 'title':
@@ -59,13 +72,22 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
           x: 0.8, y: 1.2, w: 2.0, h: 0.06, fill: { color: T.primary },
         })
         if (slide.bullets) {
+          const bw = slide.imageUrl ? '45%' : '85%'
           const bulletText = slide.bullets.map(b => ({
             text: b,
             options: { bullet: { code: '25CF' }, indentLevel: 0 },
           }))
           s.addText(bulletText, {
-            x: 0.8, y: 1.6, w: '85%', h: 4.5,
+            x: 0.8, y: 1.6, w: bw, h: 4.5,
             fontSize: 18, color: T.text, lineSpacingMultiple: 1.5,
+          })
+        }
+        if (imgData) {
+          s.addImage({
+            data: imgData,
+            x: 7.2, y: 1.4, w: 5.2, h: 4.2,
+            sizing: { type: 'cover', w: 5.2, h: 4.2 },
+            rounding: true,
           })
         }
         break
@@ -75,14 +97,12 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
           x: 0.8, y: 0.4, w: '85%', h: 0.8,
           fontSize: 24, bold: true, color: T.text,
         })
-        if (slide.imageUrl) {
-          try {
-            s.addImage({
-              path: slide.imageUrl,
-              x: 0.8, y: 1.4, w: 7.5, h: 4.2,
-              sizing: { type: 'contain', w: 7.5, h: 4.2 },
-            })
-          } catch { /* skip broken images */ }
+        if (imgData) {
+          s.addImage({
+            data: imgData,
+            x: 0.8, y: 1.4, w: 7.5, h: 4.2,
+            sizing: { type: 'contain', w: 7.5, h: 4.2 },
+          })
         }
         if (slide.bullets?.length) {
           s.addText(slide.bullets.join(' | '), {
