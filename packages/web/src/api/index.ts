@@ -1,12 +1,12 @@
-import type { PptData } from '@/types/slides'
+import type { PptData, AIConfig } from '@/types/slides'
 
 const BASE = '/api'
 
-export async function aiGenerate(topic: string): Promise<PptData> {
+export async function aiGenerate(topic: string, aiConfig?: AIConfig): Promise<PptData> {
   const res = await fetch(`${BASE}/ai/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ topic }),
+    body: JSON.stringify({ topic, aiConfig }),
   })
   if (!res.ok) throw new Error((await res.json()).error)
   return res.json()

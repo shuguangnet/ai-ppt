@@ -1,7 +1,8 @@
 <template>
   <div
     v-if="slide"
-    class="w-full max-w-3xl aspect-video bg-[#0F172A] rounded-xl shadow-2xl border border-slate-700 p-8 flex flex-col"
+    class="w-full max-w-3xl aspect-video rounded-xl shadow-2xl border border-slate-700 p-8 flex flex-col"
+    :style="{ background: '#' + currentTheme.bg }"
   >
     <!-- title 布局 -->
     <template v-if="slide.layout === 'title'">
@@ -9,14 +10,16 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent text-center text-2xl md:text-3xl font-bold text-white w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          class="bg-transparent text-center text-2xl md:text-3xl font-bold w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="{ color: '#' + currentTheme.text }"
         />
-        <div class="w-32 h-1 bg-primary rounded my-4"></div>
+        <div class="w-32 h-1 rounded my-4" :style="{ background: '#' + currentTheme.primary }"></div>
         <input
           :value="slide.subtitle || ''"
           @input="update('subtitle', ($event.target as HTMLInputElement).value)"
           placeholder="副标题"
-          class="bg-transparent text-center text-sm md:text-base text-slate-400 w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          class="bg-transparent text-center text-sm md:text-base w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="{ color: '#' + currentTheme.muted }"
         />
       </div>
     </template>
@@ -26,20 +29,41 @@
       <input
         :value="slide.title"
         @input="update('title', ($event.target as HTMLInputElement).value)"
-        class="bg-transparent text-xl md:text-2xl font-bold text-white mb-1 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+        class="bg-transparent text-xl md:text-2xl font-bold mb-1 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+        :style="{ color: '#' + currentTheme.text }"
       />
-      <div class="w-16 h-1 bg-primary rounded mb-4"></div>
+      <div class="w-16 h-1 rounded mb-4" :style="{ background: '#' + currentTheme.primary }"></div>
       <div class="flex-1 space-y-2">
         <div v-for="(b, i) in slide.bullets" :key="i" class="flex items-start gap-2">
-          <span class="text-primary mt-1 text-xs">&#9679;</span>
+          <span class="mt-1 text-xs" :style="{ color: '#' + currentTheme.primary }">&#9679;</span>
           <input
             :value="b"
             @input="updateBullet(i, ($event.target as HTMLInputElement).value)"
-            class="flex-1 bg-transparent text-slate-200 text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
+            class="flex-1 bg-transparent text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
+            :style="{ color: '#' + currentTheme.text }"
           />
           <button @click="removeBullet(i)" class="text-slate-600 hover:text-red-400 text-xs">&times;</button>
         </div>
         <button @click="addBullet" class="text-xs text-slate-500 hover:text-primary transition">+ 添加要点</button>
+      </div>
+    </template>
+
+    <!-- image 布局 -->
+    <template v-else-if="slide.layout === 'image'">
+      <input
+        :value="slide.title"
+        @input="update('title', ($event.target as HTMLInputElement).value)"
+        class="bg-transparent text-lg md:text-xl font-bold mb-2 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+        :style="{ color: '#' + currentTheme.text }"
+      />
+      <div class="flex-1 flex items-center justify-center border border-dashed border-slate-600 rounded-lg overflow-hidden">
+        <img v-if="slide.imageUrl" :src="slide.imageUrl" class="max-w-full max-h-full object-contain" @error="($event.target as HTMLImageElement).style.display='none'" />
+        <div v-else class="text-slate-500 text-sm text-center p-4">
+          <p>在右侧属性面板输入图片URL</p>
+        </div>
+      </div>
+      <div v-if="slide.bullets?.length" class="mt-2">
+        <span v-for="(b, i) in slide.bullets" :key="i" class="text-xs mr-3" :style="{ color: '#' + currentTheme.muted }">{{ b }}</span>
       </div>
     </template>
 
@@ -49,9 +73,10 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent text-center text-2xl md:text-3xl font-bold text-white w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          class="bg-transparent text-center text-2xl md:text-3xl font-bold w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="{ color: '#' + currentTheme.text }"
         />
-        <div class="w-24 h-1 bg-primary rounded mt-4"></div>
+        <div class="w-24 h-1 rounded mt-4" :style="{ background: '#' + currentTheme.primary }"></div>
       </div>
     </template>
 
@@ -61,13 +86,15 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent text-center text-2xl md:text-3xl font-bold text-white w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          class="bg-transparent text-center text-2xl md:text-3xl font-bold w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="{ color: '#' + currentTheme.text }"
         />
         <input
           :value="slide.subtitle || ''"
           @input="update('subtitle', ($event.target as HTMLInputElement).value)"
           placeholder="副标题"
-          class="bg-transparent text-center text-sm text-slate-400 w-full mt-3 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          class="bg-transparent text-center text-sm w-full mt-3 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+          :style="{ color: '#' + currentTheme.muted }"
         />
       </div>
     </template>
@@ -77,10 +104,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useSlidesStore } from '@/stores/slides'
+import { getTheme } from '@/config/themes'
 import type { Slide } from '@/types/slides'
 
 const store = useSlidesStore()
 const slide = computed(() => store.activeSlide)
+const currentTheme = computed(() => getTheme(store.theme))
 
 function update(key: keyof Slide, value: string) {
   store.updateSlide(store.activeIndex, { [key]: value })

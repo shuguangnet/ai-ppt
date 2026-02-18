@@ -7,6 +7,7 @@ const genId = () => `slide_${++uid}`
 
 export const useSlidesStore = defineStore('slides', () => {
   const title = ref('未命名演示文稿')
+  const theme = ref('dark')
   const slides = ref<Slide[]>([])
   const activeIndex = ref(0)
 
@@ -41,8 +42,8 @@ export const useSlidesStore = defineStore('slides', () => {
   }
 
   function toPptData(): PptData {
-    return { title: title.value, slides: slides.value }
+    return { title: title.value, theme: theme.value, slides: slides.value }
   }
 
-  return { title, slides, activeIndex, activeSlide, loadFromAI, updateSlide, addSlide, removeSlide, moveSlide, toPptData }
+  return { title, theme, slides, activeIndex, activeSlide, loadFromAI, updateSlide, addSlide, removeSlide, moveSlide, toPptData }
 })

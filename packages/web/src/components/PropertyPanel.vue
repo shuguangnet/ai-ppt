@@ -10,6 +10,7 @@
     >
       <option value="title">封面</option>
       <option value="content">内容</option>
+      <option value="image">图片</option>
       <option value="section">章节</option>
       <option value="thanks">结束页</option>
     </select>
@@ -30,7 +31,26 @@
       />
     </template>
 
-    <div class="mt-4 pt-4 border-t border-slate-700">
+    <template v-if="slide.layout === 'image'">
+      <label class="block text-xs text-slate-500 mb-1">图片 URL</label>
+      <input
+        :value="slide.imageUrl || ''"
+        @input="update('imageUrl', ($event.target as HTMLInputElement).value)"
+        placeholder="https://example.com/image.png"
+        class="w-full mb-4 px-2 py-1.5 rounded bg-dark border border-slate-700 text-white text-sm focus:outline-none focus:border-primary"
+      />
+    </template>
+
+    <label class="block text-xs text-slate-500 mb-1">演讲备注</label>
+    <textarea
+      :value="slide.notes || ''"
+      @input="update('notes', ($event.target as HTMLTextAreaElement).value)"
+      rows="3"
+      placeholder="演讲者备注..."
+      class="w-full mb-4 px-2 py-1.5 rounded bg-dark border border-slate-700 text-white text-sm focus:outline-none focus:border-primary resize-none"
+    ></textarea>
+
+    <div class="pt-4 border-t border-slate-700">
       <button
         @click="store.removeSlide(store.activeIndex)"
         :disabled="store.slides.length <= 1"

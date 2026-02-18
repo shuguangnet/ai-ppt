@@ -1,25 +1,29 @@
 import PptxGenJS from 'pptxgenjs'
 
 interface Slide {
-  layout: 'title' | 'content' | 'section' | 'thanks'
+  layout: 'title' | 'content' | 'section' | 'thanks' | 'image'
   title: string
   subtitle?: string
   bullets?: string[]
+  imageUrl?: string
 }
 
 interface PptData {
   title: string
+  theme?: string
   slides: Slide[]
 }
 
-const THEME = {
-  bg: '0F172A',
-  primary: '3B82F6',
-  text: 'FFFFFF',
-  muted: '94A3B8',
+const THEMES: Record<string, { bg: string; primary: string; text: string; muted: string }> = {
+  dark:   { bg: '0F172A', primary: '3B82F6', text: 'FFFFFF', muted: '94A3B8' },
+  light:  { bg: 'FFFFFF', primary: '2563EB', text: '1E293B', muted: '64748B' },
+  green:  { bg: '022C22', primary: '10B981', text: 'ECFDF5', muted: '6EE7B7' },
+  purple: { bg: '1E1B4B', primary: '8B5CF6', text: 'F5F3FF', muted: 'A78BFA' },
+  warm:   { bg: '1C1917', primary: 'F59E0B', text: 'FEFCE8', muted: 'FCD34D' },
 }
 
 export async function generatePptx(data: PptData): Promise<Buffer> {
+  const T = THEMES[data.theme || 'dark'] || THEMES.dark
   const pptx = new PptxGenJS()
   pptx.layout = 'LAYOUT_WIDE'
   pptx.author = 'AI PPT Platform'
@@ -27,32 +31,32 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
 
   for (const slide of data.slides) {
     const s = pptx.addSlide()
-    s.background = { color: THEME.bg }
+    s.background = { color: T.bg }
 
     switch (slide.layout) {
       case 'title':
         s.addText(slide.title, {
           x: 0.8, y: 2.0, w: '85%', h: 1.5,
-          fontSize: 36, bold: true, color: THEME.text, align: 'center',
+          fontSize: 36, bold: true, color: T.text, align: 'center',
         })
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
             x: 0.8, y: 3.8, w: '85%', h: 0.8,
-            fontSize: 18, color: THEME.muted, align: 'center',
+            fontSize: 18, color: T.muted, align: 'center',
           })
         }
         s.addShape(pptx.ShapeType.rect, {
-          x: 4.5, y: 5.2, w: 4.3, h: 0.06, fill: { color: THEME.primary },
+          x: 4.5, y: 5.2, w: 4.3, h: 0.06, fill: { color: T.primary },
         })
         break
 
       case 'content':
         s.addText(slide.title, {
           x: 0.8, y: 0.4, w: '85%', h: 0.8,
-          fontSize: 28, bold: true, color: THEME.text,
+          fontSize: 28, bold: true, color: T.text,
         })
         s.addShape(pptx.ShapeType.rect, {
-          x: 0.8, y: 1.2, w: 2.0, h: 0.06, fill: { color: THEME.primary },
+          x: 0.8, y: 1.2, w: 2.0, h: 0.06, fill: { color: T.primary },
         })
         if (slide.bullets) {
           const bulletText = slide.bullets.map(b => ({
@@ -61,7 +65,29 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
           }))
           s.addText(bulletText, {
             x: 0.8, y: 1.6, w: '85%', h: 4.5,
-            fontSize: 18, color: THEME.text, lineSpacingMultiple: 1.5,
+            fontSize: 18, color: T.text, lineSpacingMultiple: 1.5,
+          })
+        }
+        break
+
+      case 'image':
+        s.addText(slide.title, {
+          x: 0.8, y: 0.4, w: '85%', h: 0.8,
+          fontSize: 24, bold: true, color: T.text,
+        })
+        if (slide.imageUrl) {
+          try {
+            s.addImage({
+              path: slide.imageUrl,
+              x: 0.8, y: 1.4, w: 7.5, h: 4.2,
+              sizing: { type: 'contain', w: 7.5, h: 4.2 },
+            })
+          } catch { /* skip broken images */ }
+        }
+        if (slide.bullets?.length) {
+          s.addText(slide.bullets.join(' | '), {
+            x: 0.8, y: 5.8, w: '85%', h: 0.5,
+            fontSize: 12, color: T.muted,
           })
         }
         break
@@ -69,22 +95,22 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
       case 'section':
         s.addText(slide.title, {
           x: 0.8, y: 2.5, w: '85%', h: 1.2,
-          fontSize: 32, bold: true, color: THEME.text, align: 'center',
+          fontSize: 32, bold: true, color: T.text, align: 'center',
         })
         s.addShape(pptx.ShapeType.rect, {
-          x: 5.0, y: 3.8, w: 3.3, h: 0.06, fill: { color: THEME.primary },
+          x: 5.0, y: 3.8, w: 3.3, h: 0.06, fill: { color: T.primary },
         })
         break
 
       case 'thanks':
         s.addText(slide.title, {
           x: 0.8, y: 2.0, w: '85%', h: 1.5,
-          fontSize: 36, bold: true, color: THEME.text, align: 'center',
+          fontSize: 36, bold: true, color: T.text, align: 'center',
         })
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
             x: 0.8, y: 3.8, w: '85%', h: 0.8,
-            fontSize: 16, color: THEME.muted, align: 'center',
+            fontSize: 16, color: T.muted, align: 'center',
           })
         }
         break
