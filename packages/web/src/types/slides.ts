@@ -29,10 +29,16 @@ export interface PptData {
 export interface ThemeConfig {
   name: string
   label: string
-  bg: string
+  bg: string // fallback solid color
+  bgGradient?: string // gradient CSS
   primary: string
   text: string
   muted: string
+  // 布局装饰配置
+  layout?: 'full' | 'sidebar' | 'card' // 布局风格
+  sidebarWidth?: string // 左侧装饰区宽度，如 '30%'
+  sidebarColor?: string // 左侧装饰区颜色
+  decoration?: 'none' | 'shape' | 'gradient' | 'image' // 装饰类型
 }
 
 export interface AIConfig {

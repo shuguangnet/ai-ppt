@@ -26,16 +26,41 @@ interface PptData {
   slides: Slide[]
 }
 
-const THEMES: Record<string, { bg: string; primary: string; text: string; muted: string }> = {
+interface ThemeStyle {
+  bg: string
+  bgGradient?: string
+  primary: string
+  text: string
+  muted: string
+  layout?: 'full' | 'sidebar'
+  sidebarWidth?: number
+  sidebarColor?: string
+  decoration?: 'none' | 'shape' | 'gradient'
+}
+
+const THEMES: Record<string, ThemeStyle> = {
+  // 经典
   dark:   { bg: '0F172A', primary: '3B82F6', text: 'FFFFFF', muted: '94A3B8' },
   light:  { bg: 'FFFFFF', primary: '2563EB', text: '1E293B', muted: '64748B' },
-  green:  { bg: '022C22', primary: '10B981', text: 'ECFDF5', muted: '6EE7B7' },
-  purple: { bg: '1E1B4B', primary: '8B5CF6', text: 'F5F3FF', muted: 'A78BFA' },
-  warm:   { bg: '1C1917', primary: 'F59E0B', text: 'FEFCE8', muted: 'FCD34D' },
+  // WPS 风格
+  'blue-business': { bg: 'F5F7FA', primary: '2563EB', text: '1E293B', muted: '64748B', layout: 'sidebar', sidebarWidth: 28, sidebarColor: '1E40AF' },
+  'green-fresh': { bg: 'F0FDF4', primary: '16A34A', text: '166534', muted: '86EFAC', layout: 'full', decoration: 'shape' },
+  'orange-energy': { bg: 'FFFBEB', primary: 'EA580C', text: '7C2D12', muted: 'FDBA74', layout: 'sidebar', sidebarWidth: 25, sidebarColor: 'EA580C' },
+  'purple-elegant': { bg: 'FAF5FF', primary: '9333EA', text: '581C87', muted: 'D8B4FE', layout: 'full', decoration: 'gradient' },
+  'red-official': { bg: 'FEF2F2', primary: 'DC2626', text: '7F1D1D', muted: 'FCA5A5', layout: 'full', decoration: 'shape' },
+  'cyan-tech': { bg: 'ECFEFF', primary: '0891B2', text: '164E63', muted: '67E8F9', layout: 'sidebar', sidebarWidth: 30, sidebarColor: '0891B2' },
+  'gold-luxury': { bg: 'FFFBEB', primary: 'CA8A04', text: '713F12', muted: 'FDE047', layout: 'full', decoration: 'gradient' },
+  'pink-sweet': { bg: 'FDF2F8', primary: 'DB2777', text: '831843', muted: 'F9A8D4', layout: 'sidebar', sidebarWidth: 22, sidebarColor: 'DB2777' },
+  'gray-professional': { bg: 'F8FAFC', primary: '475569', text: '1E293B', muted: '94A3B8', layout: 'sidebar', sidebarWidth: 26, sidebarColor: '334155' },
+  'blue-purple': { bg: 'EEF2FF', primary: '4F46E5', text: '312E81', muted: 'A5B4FC', layout: 'full', decoration: 'gradient' },
+  'green-nature': { bg: 'F0FDF4', primary: '15803D', text: '14532D', muted: '86EFAC', layout: 'full', decoration: 'shape' },
+  'orange-gradient': { bg: 'FFF7ED', primary: 'C2410C', text: '7C2D12', muted: 'FDBA74', layout: 'full', decoration: 'gradient' },
 }
 
 export async function generatePptx(data: PptData): Promise<Buffer> {
   const T = THEMES[data.theme || 'dark'] || THEMES.dark
+  // Calculate content offset for sidebar layout
+  const contentOffset = T.layout === 'sidebar' && T.sidebarWidth ? T.sidebarWidth / 100 * 10 + 0.3 : 0.8
 
   // Pre-download all images as base64
   const imageMap = new Map<string, string>()
@@ -53,7 +78,25 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
 
   for (const slide of data.slides) {
     const s = pptx.addSlide()
+    // Set background
     s.background = { color: T.bg }
+
+    // Add sidebar decoration if theme has sidebar layout
+    if (T.layout === 'sidebar' && T.sidebarWidth) {
+      const sidebarW = T.sidebarWidth / 100 * 10 // Convert percentage to inches (10 is slide width)
+      s.addShape(pptx.ShapeType.rect, {
+        x: 0, y: 0, w: sidebarW, h: 5.4,
+        fill: { color: T.sidebarColor || T.primary },
+      })
+    }
+
+    // Add top decoration bar if theme has shape decoration
+    if (T.decoration === 'shape') {
+      s.addShape(pptx.ShapeType.rect, {
+        x: 0, y: 0, w: 10, h: 0.15,
+        fill: { color: T.primary },
+      })
+    }
     const imgData = slide.imageUrl ? imageMap.get(slide.imageUrl) : undefined
 
     switch (slide.layout) {
@@ -83,14 +126,14 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
 
       case 'content':
         s.addText(slide.title, {
-          x: 0.8, y: 0.4, w: '85%', h: 0.8,
+          x: contentOffset, y: 0.4, w: '85%', h: 0.8,
           fontSize: slide.titleStyle?.fontSize || 28,
           bold: slide.titleStyle?.bold ?? true,
           italic: slide.titleStyle?.italic || false,
           color: slide.titleStyle?.color || T.text,
         })
         s.addShape(pptx.ShapeType.rect, {
-          x: 0.8, y: 1.2, w: 2.0, h: 0.06, fill: { color: T.primary },
+          x: contentOffset, y: 1.2, w: 2.0, h: 0.06, fill: { color: T.primary },
         })
         if (slide.bullets) {
           const bw = slide.imageUrl ? '45%' : '85%'
@@ -99,7 +142,7 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
             options: { bullet: { code: '25CF' }, indentLevel: 0 },
           }))
           s.addText(bulletText, {
-            x: 0.8, y: 1.6, w: bw, h: 4.5,
+            x: contentOffset, y: 1.6, w: bw, h: 4.5,
             fontSize: slide.bulletStyle?.fontSize || 18,
             bold: slide.bulletStyle?.bold || false,
             italic: slide.bulletStyle?.italic || false,
