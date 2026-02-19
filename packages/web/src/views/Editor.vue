@@ -49,8 +49,8 @@
       </div>
       
       <div class="flex-1 flex flex-col h-full overflow-hidden bg-dark relative">
-        <div class="flex-1 overflow-auto p-4 md:p-8 flex items-center justify-center bg-grid bg-fixed bg-center">
-            <SlideCanvas />
+        <div class="flex-1 overflow-auto p-6 md:p-10 flex items-center justify-center bg-grid bg-fixed bg-center relative">
+            <SlideCanvas @select="() => {}" />
         </div>
         
         <!-- 移动端底部 -->
@@ -109,8 +109,20 @@ async function doExport() {
 
 <style scoped>
 .bg-grid {
-  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 0v20M0 1h20' stroke='rgba(255,255,255,0.05)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 0v24M0 1h24' stroke='rgba(255,255,255,0.04)' stroke-width='1' fill='none'/%3E%3C/svg%3E");
 }
+
+.bg-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }

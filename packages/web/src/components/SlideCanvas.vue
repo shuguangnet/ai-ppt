@@ -1,9 +1,13 @@
 <template>
   <div
     v-if="slide"
-    class="w-full max-w-3xl aspect-video rounded-xl shadow-2xl border border-slate-700 overflow-hidden relative"
+    class="w-full max-w-3xl aspect-video rounded-2xl overflow-hidden relative transition-all duration-300 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)]"
+    :class="isSelected ? 'ring-2 ring-primary shadow-2xl' : 'shadow-xl'"
     :style="{ background: currentTheme.bgGradient || '#' + currentTheme.bg }"
+    @click="$emit('select')"
   >
+    <!-- 画布边框效果 -->
+    <div class="absolute inset-0 rounded-2xl border border-white/10 pointer-events-none"></div>
     <!-- 左侧装饰条 (sidebar 布局) -->
     <div
       v-if="currentTheme.layout === 'sidebar'"
@@ -45,15 +49,15 @@
           <input
             :value="slide.title"
             @input="update('title', ($event.target as HTMLInputElement).value)"
-            class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-2xl font-bold"
+            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 text-2xl font-bold transition-all duration-200"
             :style="getTextStyle(slide.titleStyle, currentTheme.text)"
           />
-          <div class="w-32 h-1 rounded my-4" :style="{ background: '#' + currentTheme.primary }"></div>
+          <div class="w-32 h-1 rounded-full my-4" :style="{ background: '#' + currentTheme.primary }"></div>
           <input
             :value="slide.subtitle || ''"
             @input="update('subtitle', ($event.target as HTMLInputElement).value)"
             placeholder="副标题"
-            class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 transition-all duration-200"
             :style="getTextStyle(slide.subtitleStyle, currentTheme.muted)"
           />
         </div>
@@ -64,25 +68,25 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent mb-1 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-xl font-bold"
+          class="bg-transparent/50 mb-1 focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 text-xl font-bold transition-all duration-200"
           :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
-        <div class="w-16 h-1 rounded mb-4" :style="{ background: '#' + currentTheme.primary }"></div>
+        <div class="w-16 h-1 rounded-full mb-4" :style="{ background: '#' + currentTheme.primary }"></div>
         <div class="flex-1 flex gap-4">
           <div class="space-y-2" :class="slide.imageUrl ? 'flex-1' : 'w-full'">
-            <div v-for="(b, i) in slide.bullets" :key="i" class="flex items-start gap-2">
-              <span class="mt-1 text-xs" :style="{ color: '#' + currentTheme.primary }">&#9679;</span>
+            <div v-for="(b, i) in slide.bullets" :key="i" class="flex items-start gap-2 group">
+              <span class="mt-1.5 text-xs" :style="{ color: '#' + currentTheme.primary }">&#9679;</span>
               <input
                 :value="b"
                 @input="updateBullet(i, ($event.target as HTMLInputElement).value)"
-                class="flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-primary rounded px-1 py-0.5"
+                class="flex-1 bg-transparent/30 focus:bg-white/10 focus:outline-none rounded-lg px-2 py-1.5 transition-all duration-200"
                 :style="getTextStyle(slide.bulletStyle, currentTheme.text)"
               />
-              <button @click="removeBullet(i)" class="text-slate-600 hover:text-red-400 text-xs">&times;</button>
+              <button @click="removeBullet(i)" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 text-xs px-1 transition-all duration-200">&times;</button>
             </div>
-            <button @click="addBullet" class="text-xs text-slate-500 hover:text-primary transition">+ 添加要点</button>
+            <button @click="addBullet" class="text-xs text-slate-500 hover:text-primary transition mt-2 pl-4">+ 添加要点</button>
           </div>
-          <div v-if="slide.imageUrl" class="w-2/5 shrink-0 rounded-lg overflow-hidden">
+          <div v-if="slide.imageUrl" class="w-2/5 shrink-0 rounded-lg overflow-hidden shadow-lg">
             <img :src="slide.imageUrl" class="w-full h-full object-cover" @error="($event.target as HTMLImageElement).style.display='none'" />
           </div>
         </div>
@@ -93,17 +97,20 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent mb-2 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-lg font-bold"
+          class="bg-transparent/50 mb-2 focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 text-lg font-bold transition-all duration-200"
           :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
-        <div class="flex-1 flex items-center justify-center border border-dashed border-slate-600 rounded-lg overflow-hidden">
+        <div class="flex-1 flex items-center justify-center border-2 border-dashed border-slate-600/50 rounded-xl overflow-hidden bg-slate-800/20">
           <img v-if="slide.imageUrl" :src="slide.imageUrl" class="max-w-full max-h-full object-contain" @error="($event.target as HTMLImageElement).style.display='none'" />
-          <div v-else class="text-slate-500 text-sm text-center p-4">
+          <div v-else class="text-slate-500 text-sm text-center p-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
             <p>在右侧属性面板输入图片URL</p>
           </div>
         </div>
-        <div v-if="slide.bullets?.length" class="mt-2">
-          <span v-for="(b, i) in slide.bullets" :key="i" class="text-xs mr-3" :style="{ color: '#' + currentTheme.muted }">{{ b }}</span>
+        <div v-if="slide.bullets?.length" class="mt-3 flex flex-wrap gap-2">
+          <span v-for="(b, i) in slide.bullets" :key="i" class="text-xs px-2 py-1 bg-white/10 rounded-full" :style="{ color: '#' + currentTheme.muted }">{{ b }}</span>
         </div>
       </template>
 
@@ -113,10 +120,10 @@
           <input
             :value="slide.title"
             @input="update('title', ($event.target as HTMLInputElement).value)"
-            class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-3xl font-bold"
+            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-2 text-3xl font-bold transition-all duration-200"
             :style="getTextStyle(slide.titleStyle, currentTheme.text)"
           />
-          <div class="w-24 h-1 rounded mt-4" :style="{ background: '#' + currentTheme.primary }"></div>
+          <div class="w-24 h-1 rounded-full mt-5" :style="{ background: '#' + currentTheme.primary }"></div>
         </div>
       </template>
 
@@ -126,14 +133,14 @@
           <input
             :value="slide.title"
             @input="update('title', ($event.target as HTMLInputElement).value)"
-            class="bg-transparent text-center w-full focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 text-3xl font-bold"
+            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-2 text-3xl font-bold transition-all duration-200"
             :style="getTextStyle(slide.titleStyle, currentTheme.text)"
           />
           <input
             :value="slide.subtitle || ''"
             @input="update('subtitle', ($event.target as HTMLInputElement).value)"
             placeholder="副标题"
-            class="bg-transparent text-center w-full mt-3 focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1"
+            class="bg-transparent/50 text-center w-full mt-3 focus:outline-none focus:bg-white/10 rounded-lg px-4 py-2 transition-all duration-200"
             :style="getTextStyle(slide.subtitleStyle, currentTheme.muted)"
           />
         </div>
@@ -148,9 +155,12 @@ import { useSlidesStore } from '@/stores/slides'
 import { getTheme } from '@/config/themes'
 import type { Slide, TextStyle } from '@/types/slides'
 
+defineEmits(['select'])
+
 const store = useSlidesStore()
 const slide = computed(() => store.activeSlide)
 const currentTheme = computed(() => getTheme(store.theme))
+const isSelected = computed(() => store.activeIndex >= 0)
 
 function getSidebarBg() {
   const c = currentTheme.value

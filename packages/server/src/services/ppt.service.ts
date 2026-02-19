@@ -59,8 +59,10 @@ const THEMES: Record<string, ThemeStyle> = {
 
 export async function generatePptx(data: PptData): Promise<Buffer> {
   const T = THEMES[data.theme || 'dark'] || THEMES.dark
-  // Calculate content offset for sidebar layout
-  const contentOffset = T.layout === 'sidebar' && T.sidebarWidth ? T.sidebarWidth / 100 * 10 + 0.3 : 0.8
+  // Calculate content offset for sidebar layout (sidebarWidth is in percentage, convert to inches)
+  // For sidebarWidth like 30 (meaning 30%), the actual sidebar width in inches is: 30/100 * 10 = 3 inches
+  const sidebarWidthInches = T.layout === 'sidebar' && T.sidebarWidth ? (T.sidebarWidth / 100) * 10 : 0
+  const contentOffset = sidebarWidthInches > 0 ? sidebarWidthInches + 0.5 : 0.8
 
   // Pre-download all images as base64
   const imageMap = new Map<string, string>()
@@ -101,8 +103,10 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
 
     switch (slide.layout) {
       case 'title':
+        // Calculate content width based on sidebar
+        const titleContentW = sidebarWidthInches > 0 ? 10 - sidebarWidthInches - 0.6 : 8.5
         s.addText(slide.title, {
-          x: 0.8, y: 2.0, w: '85%', h: 1.5,
+          x: sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 : 0.8, y: 2.0, w: titleContentW, h: 1.5,
           fontSize: slide.titleStyle?.fontSize || 36,
           bold: slide.titleStyle?.bold ?? true,
           italic: slide.titleStyle?.italic || false,
@@ -111,7 +115,7 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
         })
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
-            x: 0.8, y: 3.8, w: '85%', h: 0.8,
+            x: sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 : 0.8, y: 3.8, w: titleContentW, h: 0.8,
             fontSize: slide.subtitleStyle?.fontSize || 18,
             bold: slide.subtitleStyle?.bold || false,
             italic: slide.subtitleStyle?.italic || false,
@@ -119,8 +123,10 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
             align: 'center',
           })
         }
+        // Center the underline relative to content
+        const underlineX = sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 + (titleContentW / 2) - 2.15 : 4.5
         s.addShape(pptx.ShapeType.rect, {
-          x: 4.5, y: 5.2, w: 4.3, h: 0.06, fill: { color: T.primary },
+          x: underlineX, y: 5.2, w: 4.3, h: 0.06, fill: { color: T.primary },
         })
         break
 
@@ -184,22 +190,25 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
         break
 
       case 'section':
+        const sectionContentW = sidebarWidthInches > 0 ? 10 - sidebarWidthInches - 0.6 : 8.5
         s.addText(slide.title, {
-          x: 0.8, y: 2.5, w: '85%', h: 1.2,
+          x: sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 : 0.8, y: 2.5, w: sectionContentW, h: 1.2,
           fontSize: slide.titleStyle?.fontSize || 32,
           bold: slide.titleStyle?.bold ?? true,
           italic: slide.titleStyle?.italic || false,
           color: slide.titleStyle?.color || T.text,
           align: 'center',
         })
+        const sectionUnderlineX = sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 + (sectionContentW / 2) - 1.65 : 5.0
         s.addShape(pptx.ShapeType.rect, {
-          x: 5.0, y: 3.8, w: 3.3, h: 0.06, fill: { color: T.primary },
+          x: sectionUnderlineX, y: 3.8, w: 3.3, h: 0.06, fill: { color: T.primary },
         })
         break
 
       case 'thanks':
+        const thanksContentW = sidebarWidthInches > 0 ? 10 - sidebarWidthInches - 0.6 : 8.5
         s.addText(slide.title, {
-          x: 0.8, y: 2.0, w: '85%', h: 1.5,
+          x: sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 : 0.8, y: 2.0, w: thanksContentW, h: 1.5,
           fontSize: slide.titleStyle?.fontSize || 36,
           bold: slide.titleStyle?.bold ?? true,
           italic: slide.titleStyle?.italic || false,
@@ -208,7 +217,7 @@ export async function generatePptx(data: PptData): Promise<Buffer> {
         })
         if (slide.subtitle) {
           s.addText(slide.subtitle, {
-            x: 0.8, y: 3.8, w: '85%', h: 0.8,
+            x: sidebarWidthInches > 0 ? sidebarWidthInches + 0.3 : 0.8, y: 3.8, w: thanksContentW, h: 0.8,
             fontSize: slide.subtitleStyle?.fontSize || 16,
             bold: slide.subtitleStyle?.bold || false,
             italic: slide.subtitleStyle?.italic || false,
