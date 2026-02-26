@@ -16,6 +16,10 @@
       </div>
       <div class="flex items-center gap-2">
         <div class="hidden md:flex items-center gap-1 mr-2">
+            <button @click="showRefine = true" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md transition">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              AI 润色
+            </button>
             <button @click="showTheme = !showTheme" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-md transition" :class="{'bg-slate-700 text-white': showTheme}">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
               主题
@@ -79,6 +83,9 @@
           <PropertyPanel />
       </div>
     </div>
+
+    <!-- AI 润色弹窗 -->
+    <AIRefineModal :visible="showRefine" @close="showRefine = false" />
   </div>
 </template>
 
@@ -90,10 +97,12 @@ import SlideList from '@/components/SlideList.vue'
 import SlideCanvas from '@/components/SlideCanvas.vue'
 import PropertyPanel from '@/components/PropertyPanel.vue'
 import ThemePicker from '@/components/ThemePicker.vue'
+import AIRefineModal from '@/components/AIRefineModal.vue'
 
 const store = useSlidesStore()
 const exporting = ref(false)
 const showTheme = ref(false)
+const showRefine = ref(false)
 
 function addSlide() { store.addSlide(store.activeIndex) }
 function prev() { if (store.activeIndex > 0) store.activeIndex-- }

@@ -75,3 +75,51 @@ export async function exportPptx(data: PptData) {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+// 润色PPT - 流式
+export async function refinePptStream(
+  pptData: PptData,
+  instruction: string,
+  mode: 'refine' | 'polish',
+  aiConfig: AIConfig | undefined,
+  onChunk: (text: string) => void
+): Promise<PptData> {
+  const res = await fetch(`${BASE}/ai/${mode}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pptData, instruction, aiConfig }),
+  })
+
+  if (!res.ok) throw new Error((await res.json()).error)
+
+  const reader = res.body!.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  let result: PptData | null = null
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const parts = buffer.split('\n\n')
+    buffer = parts.pop()!
+
+    for (const part of parts) {
+      const line = part.trim()
+      if (!line.startsWith('data: ')) continue
+      try {
+        const msg = JSON.parse(line.slice(6))
+        if (msg.error) throw new Error(msg.error)
+        if (msg.chunk) onChunk(msg.chunk)
+        if (msg.done) result = msg.data
+      } catch (e: any) {
+        if (e.message?.includes('Unterminated')) continue
+        throw e
+      }
+    }
+  }
+
+  if (!result) throw new Error('润色失败')
+  return result
+}

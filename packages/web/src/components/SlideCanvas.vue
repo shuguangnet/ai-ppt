@@ -40,7 +40,7 @@
 
     <!-- 主内容区 -->
     <div
-      class="h-full p-8 flex flex-col"
+      class="h-full p-8 flex flex-col overflow-visible"
       :style="{ marginLeft: currentTheme.layout === 'sidebar' ? (currentTheme.sidebarWidth || '25%') : '0' }"
     >
       <!-- title 布局 -->
@@ -49,7 +49,7 @@
           <input
             :value="slide.title"
             @input="update('title', ($event.target as HTMLInputElement).value)"
-            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 text-2xl font-bold transition-all duration-200"
+            class="bg-transparent text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 text-2xl font-bold transition-all duration-200"
             :style="getTextStyle(slide.titleStyle, currentTheme.text)"
           />
           <div class="w-32 h-1 rounded-full my-4" :style="{ background: '#' + currentTheme.primary }"></div>
@@ -57,7 +57,7 @@
             :value="slide.subtitle || ''"
             @input="update('subtitle', ($event.target as HTMLInputElement).value)"
             placeholder="副标题"
-            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 transition-all duration-200"
+            class="bg-transparent text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 transition-all duration-200"
             :style="getTextStyle(slide.subtitleStyle, currentTheme.muted)"
           />
         </div>
@@ -68,7 +68,7 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent/50 mb-1 focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 text-xl font-bold transition-all duration-200"
+          class="bg-transparent mb-1 focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 text-xl font-bold transition-all duration-200"
           :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
         <div class="w-16 h-1 rounded-full mb-4" :style="{ background: '#' + currentTheme.primary }"></div>
@@ -79,7 +79,7 @@
               <input
                 :value="b"
                 @input="updateBullet(i, ($event.target as HTMLInputElement).value)"
-                class="flex-1 bg-transparent/30 focus:bg-white/10 focus:outline-none rounded-lg px-2 py-1.5 transition-all duration-200"
+                class="flex-1 bg-transparent focus:bg-white/10 focus:outline-none rounded-lg px-3 py-2 transition-all duration-200"
                 :style="getTextStyle(slide.bulletStyle, currentTheme.text)"
               />
               <button @click="removeBullet(i)" class="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 text-xs px-1 transition-all duration-200">&times;</button>
@@ -97,7 +97,7 @@
         <input
           :value="slide.title"
           @input="update('title', ($event.target as HTMLInputElement).value)"
-          class="bg-transparent/50 mb-2 focus:outline-none focus:bg-white/10 rounded-lg px-3 py-2 text-lg font-bold transition-all duration-200"
+          class="bg-transparent mb-2 focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 text-lg font-bold transition-all duration-200"
           :style="getTextStyle(slide.titleStyle, currentTheme.text)"
         />
         <div class="flex-1 flex items-center justify-center border-2 border-dashed border-slate-600/50 rounded-xl overflow-hidden bg-slate-800/20">
@@ -120,7 +120,7 @@
           <input
             :value="slide.title"
             @input="update('title', ($event.target as HTMLInputElement).value)"
-            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-2 text-3xl font-bold transition-all duration-200"
+            class="bg-transparent text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 text-3xl font-bold transition-all duration-200"
             :style="getTextStyle(slide.titleStyle, currentTheme.text)"
           />
           <div class="w-24 h-1 rounded-full mt-5" :style="{ background: '#' + currentTheme.primary }"></div>
@@ -133,14 +133,14 @@
           <input
             :value="slide.title"
             @input="update('title', ($event.target as HTMLInputElement).value)"
-            class="bg-transparent/50 text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-2 text-3xl font-bold transition-all duration-200"
+            class="bg-transparent text-center w-full focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 text-3xl font-bold transition-all duration-200"
             :style="getTextStyle(slide.titleStyle, currentTheme.text)"
           />
           <input
             :value="slide.subtitle || ''"
             @input="update('subtitle', ($event.target as HTMLInputElement).value)"
             placeholder="副标题"
-            class="bg-transparent/50 text-center w-full mt-3 focus:outline-none focus:bg-white/10 rounded-lg px-4 py-2 transition-all duration-200"
+            class="bg-transparent text-center w-full mt-3 focus:outline-none focus:bg-white/10 rounded-lg px-4 py-3 transition-all duration-200"
             :style="getTextStyle(slide.subtitleStyle, currentTheme.muted)"
           />
         </div>
